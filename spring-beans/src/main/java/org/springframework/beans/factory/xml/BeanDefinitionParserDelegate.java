@@ -512,11 +512,19 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		try {
+			// bd实例为GenericBeanDefinition
 			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
 
+			// 解析属性
 			parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
 			bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
 
+			/*
+			解析meta元素
+			<bean id="validEmptyWithDescription" class="org.springframework.tests.sample.beans.TestBean">
+				<meta key="key" value="value"/>
+			</bean>
+			 */
 			parseMetaElements(ele, bd);
 			parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
 			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
@@ -721,6 +729,18 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
+	 * // 水果盘，可以拿到水果
+	 * public abstract class FruitPlate{
+	 *     // 抽象方法获取新鲜水果
+	 *     protected abstract Fruit getFruit();
+	 * }
+	 *
+	 * <bean id="bananer" class="cn.com.willchen.test.di.Bananer " scope="prototype"/>
+	 *
+	 * <bean id="fruitPlate2" class="cn.com.willchen.test.di.FruitPlate">
+	 *     <lookup-method name="getFruit" bean="bananer"/>
+	 * </bean>
+	 *
 	 * Parse lookup-override sub-elements of the given bean element.
 	 */
 	public void parseLookupOverrideSubElements(Element beanEle, MethodOverrides overrides) {
@@ -739,6 +759,14 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
+	 * 在运行时用新方法代替旧方法
+	 * <bean id="getKobe" class="xxxx">
+	 *  <!-- methodName 需要替换的method name -->
+	 * 	<replaced-method name="methodName" replacer="yao" />
+	 * </bean>
+	 * <bean id="yao" class="yyyy" />
+	 * Bean yao 需要实现接口 org.springframework.beans.factory.support.MethodReplacer
+	 *
 	 * Parse replaced-method sub-elements of the given bean element.
 	 */
 	public void parseReplacedMethodSubElements(Element beanEle, MethodOverrides overrides) {
@@ -773,6 +801,7 @@ public class BeanDefinitionParserDelegate {
 		String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 		if (StringUtils.hasLength(indexAttr)) {
+			// 通过索引的方式配置
 			try {
 				int index = Integer.parseInt(indexAttr);
 				if (index < 0) {
@@ -853,6 +882,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
+	 * 解析 qualifier 子元素 <qualifier />
 	 * Parse a qualifier element.
 	 */
 	public void parseQualifierElement(Element ele, AbstractBeanDefinition bd) {
