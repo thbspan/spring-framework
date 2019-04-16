@@ -66,6 +66,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * <p>If not set, the implementation may use a default as appropriate.
 	 */
 	public void setConfigLocation(String location) {
+		// 使用单个字符串表示多个资源时，多个路径之间可以使用,; \t\n分割
 		setConfigLocations(StringUtils.tokenizeToStringArray(location, CONFIG_LOCATION_DELIMITERS));
 	}
 

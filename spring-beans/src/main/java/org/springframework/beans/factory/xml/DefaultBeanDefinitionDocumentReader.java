@@ -125,7 +125,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// the new (child) delegate with a reference to the parent for fallback purposes,
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
-		// 先记录老的 delegate 对象
+		// 先记录之前的 delegate 对象
 		BeanDefinitionParserDelegate parent = this.delegate;
 		// 创建新的 delegate 对象
 		this.delegate = createDelegate(getReaderContext(), root, parent);
@@ -146,10 +146,11 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				}
 			}
 		}
-
+		// 解析前处理，空实现。方便子类继承
 		preProcessXml(root);
 		// 解析Bean Definitions
 		parseBeanDefinitions(root, this.delegate);
+		// 解析后处理，空实现。方便子类继承
 		postProcessXml(root);
 
 		this.delegate = parent;
@@ -159,6 +160,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			XmlReaderContext readerContext, Element root, @Nullable BeanDefinitionParserDelegate parentDelegate) {
 
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
+		// 初始化bean配置的默认值
 		delegate.initDefaults(root, parentDelegate);
 		return delegate;
 	}

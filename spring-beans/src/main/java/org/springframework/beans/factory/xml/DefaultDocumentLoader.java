@@ -97,6 +97,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 				// Enforce namespace aware for XSD...
 				factory.setNamespaceAware(true);
 				try {
+					// 查看api文档
 					factory.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
 				}
 				catch (IllegalArgumentException ex) {

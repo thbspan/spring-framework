@@ -430,10 +430,12 @@ public class BeanDefinitionParserDelegate {
 			}
 		}
 
+		//当解析包含的子<bean>元素时，containingBean不为空
 		if (containingBean == null) {
 			checkNameUniqueness(beanName, aliases, ele);
 		}
 
+		// 详细解析Bean的定义
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
 			if (!StringUtils.hasText(beanName)) {
@@ -1007,6 +1009,13 @@ public class BeanDefinitionParserDelegate {
 			}
 			return nestedBd;
 		}
+		/*
+		<bean id="taskService" class="xxx" >
+			<property name="name">
+				<ref bean="yyy"  />
+			</property>
+		</bean>
+		 */
 		else if (nodeNameEquals(ele, REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
 			String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
@@ -1028,12 +1037,33 @@ public class BeanDefinitionParserDelegate {
 			ref.setSource(extractSource(ele));
 			return ref;
 		}
+		/*
+		<bean id="taskService" class="xxx" >
+			<property name="name">
+				<idref bean="zzz" />
+			</property>
+		</bean>
+		 */
 		else if (nodeNameEquals(ele, IDREF_ELEMENT)) {
 			return parseIdRefElement(ele);
 		}
+		/*
+		<bean id="taskService" class="ccc" >
+			<property name="name">
+				<value type="java.lang.String" >hello</value>
+			</property>
+		</bean>
+		 */
 		else if (nodeNameEquals(ele, VALUE_ELEMENT)) {
 			return parseValueElement(ele, defaultValueType);
 		}
+		/*
+		<bean id="taskService" class="ccc" >
+			<property name="name">
+				<null />
+			</property>
+		</bean>
+		 */
 		else if (nodeNameEquals(ele, NULL_ELEMENT)) {
 			// It's a distinguished null value. Let's wrap it in a TypedStringValue
 			// object in order to preserve the source location.
@@ -1041,18 +1071,81 @@ public class BeanDefinitionParserDelegate {
 			nullHolder.setSource(extractSource(ele));
 			return nullHolder;
 		}
+		/*
+		<bean id="peter" class="java.lang.String">
+				<constructor-arg value="peter" />
+		</bean>
+		<bean id="taskService" class="cvdx" >
+			<property name="names">
+				<array>
+					<!-- 可以嵌套其他任何元素 -->
+					<value>jack</value>
+					<ref bean="peter"/>
+				</array>
+			</property>
+		</bean>
+		 */
 		else if (nodeNameEquals(ele, ARRAY_ELEMENT)) {
 			return parseArrayElement(ele, bd);
 		}
+		/*
+		和array类似
+		<bean id="peter" class="java.lang.String">
+				<constructor-arg value="peter" />
+		</bean>
+		<bean id="taskService" class="cvdx" >
+			<property name="list">
+				<list>
+					<!-- 可以嵌套其他任何元素 -->
+					<value>jack</value>
+					<ref bean="peter"/>
+				</list>
+			</property>
+		</bean>
+		 */
 		else if (nodeNameEquals(ele, LIST_ELEMENT)) {
 			return parseListElement(ele, bd);
 		}
+		/*
+		<bean id="peter" class="java.lang.String">
+				<constructor-arg value="peter" />
+		</bean>
+		<bean id="taskService" class="cvdx" >
+			<property name="set">
+				<set>
+					<!-- 可以嵌套其他任何元素 -->
+					<value>jack</value>
+					<ref bean="peter"/>
+				</set>
+			</property>
+		</bean>
+		 */
 		else if (nodeNameEquals(ele, SET_ELEMENT)) {
 			return parseSetElement(ele, bd);
 		}
+		/*
+		key value可以是任意类型，支持嵌套
+		<map>
+			<entry key="name" value="swift"></entry>
+			<entry key-ref="peter" value-ref="peter"/>
+			<entry>
+				<key>
+					<ref bean="peter"/>
+				</key>
+				<value>test</value>
+			</entry>
+		</map>
+		 */
 		else if (nodeNameEquals(ele, MAP_ELEMENT)) {
 			return parseMapElement(ele, bd);
 		}
+		/*
+		类似简化的map, key value只能是string类型
+		<props>
+			<prop key="a">test</prop>
+			<prop key="b">prop</prop>
+		</props>
+		 */
 		else if (nodeNameEquals(ele, PROPS_ELEMENT)) {
 			return parsePropsElement(ele);
 		}
