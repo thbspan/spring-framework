@@ -288,6 +288,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.parent;
 	}
 
+	public AbstractApplicationContext(ClassLoader classLoader) {
+		super(classLoader);
+	}
+
 	/**
 	 * Set the {@code Environment} for this application context.
 	 * <p>Default value is determined by {@link #createEnvironment()}. Replacing the

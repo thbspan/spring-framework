@@ -53,9 +53,9 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 
 	private boolean isAbstract;
 
+	@Nullable
 	private boolean isFinal;
 
-	@Nullable
 	private String enclosingClassName;
 
 	private boolean independentInnerClass;
