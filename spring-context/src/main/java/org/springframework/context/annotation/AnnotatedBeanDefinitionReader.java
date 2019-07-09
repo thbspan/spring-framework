@@ -243,7 +243,7 @@ public class AnnotatedBeanDefinitionReader {
 		}
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
-		// 创建相应的代理对象
+		// 创建相应的代理对象(jdk/cglib)
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 		// 向IOC容器注册
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);

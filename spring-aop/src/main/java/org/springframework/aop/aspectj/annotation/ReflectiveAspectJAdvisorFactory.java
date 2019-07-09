@@ -112,8 +112,11 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 	@Override
 	public List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory aspectInstanceFactory) {
+		// 获取有@Aspect标记的类的名称
 		Class<?> aspectClass = aspectInstanceFactory.getAspectMetadata().getAspectClass();
+		// aspect的名称（bean的名称）
 		String aspectName = aspectInstanceFactory.getAspectMetadata().getAspectName();
+		// 验证
 		validate(aspectClass);
 
 		// We need to wrap the MetadataAwareAspectInstanceFactory with a decorator
@@ -131,11 +134,12 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		// If it's a per target aspect, emit the dummy instantiating aspect.
 		if (!advisors.isEmpty() && lazySingletonAspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) {
+			// 配置了增强延迟初始化，需要在首位加入同步实例化增强器
 			Advisor instantiationAdvisor = new SyntheticInstantiationAdvisor(lazySingletonAspectInstanceFactory);
 			advisors.add(0, instantiationAdvisor);
 		}
 
-		// Find introduction fields.
+		// Find introduction fields. @DeclareParents注解，不常用
 		for (Field field : aspectClass.getDeclaredFields()) {
 			Advisor advisor = getDeclareParentsAdvisor(field);
 			if (advisor != null) {
@@ -149,7 +153,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
 		final List<Method> methods = new ArrayList<>();
 		ReflectionUtils.doWithMethods(aspectClass, method -> {
-			// Exclude pointcuts
+			// Exclude pointcuts（也包括没有注解的方法）
 			if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
 				methods.add(method);
 			}
@@ -189,16 +193,23 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		validate(aspectInstanceFactory.getAspectMetadata().getAspectClass());
 
+		// 获取切点信息; 参数：方法 @Aspect类名称
 		AspectJExpressionPointcut expressionPointcut = getPointcut(
 				candidateAdviceMethod, aspectInstanceFactory.getAspectMetadata().getAspectClass());
 		if (expressionPointcut == null) {
 			return null;
 		}
 
+		// 根据切点信息生成增强器
 		return new InstantiationModelAwarePointcutAdvisorImpl(expressionPointcut, candidateAdviceMethod,
 				this, aspectInstanceFactory, declarationOrderInAspect, aspectName);
 	}
 
+	/**
+	 * 仅获取注解上的表达式信息，不解析表达式
+	 * Point("execution(* *.test(..))")
+	 * Before("test()")
+	 */
 	@Nullable
 	private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
 		AspectJAnnotation<?> aspectJAnnotation =

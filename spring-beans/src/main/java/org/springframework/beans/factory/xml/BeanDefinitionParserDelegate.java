@@ -1072,9 +1072,6 @@ public class BeanDefinitionParserDelegate {
 			return nullHolder;
 		}
 		/*
-		<bean id="peter" class="java.lang.String">
-				<constructor-arg value="peter" />
-		</bean>
 		<bean id="taskService" class="cvdx" >
 			<property name="names">
 				<array>
